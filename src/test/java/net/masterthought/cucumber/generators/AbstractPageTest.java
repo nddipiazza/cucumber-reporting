@@ -121,7 +121,7 @@ public class AbstractPageTest extends PageTest {
 
         // then
         VelocityContext context = page.context;
-        assertThat(context.getKeys()).hasSize(10);
+        assertThat(context.getKeys()).hasSize(11);
 
         Object obj = context.get("counter");
         assertThat(obj).isInstanceOf(Counter.class);
@@ -152,7 +152,7 @@ public class AbstractPageTest extends PageTest {
 
         // then
         VelocityContext context = page.context;
-        assertThat(context.getKeys()).hasSize(10);
+        assertThat(context.getKeys()).hasSize(11);
         assertThat(context.get("build_time")).isNotNull();
     }
 
@@ -169,7 +169,7 @@ public class AbstractPageTest extends PageTest {
 
         // then
         VelocityContext context = page.context;
-        assertThat(context.getKeys()).hasSize(10);
+        assertThat(context.getKeys()).hasSize(11);
         assertThat(context.get("build_time")).isNotNull();
     }
 
@@ -185,7 +185,7 @@ public class AbstractPageTest extends PageTest {
 
         // then
         VelocityContext context = page.context;
-        assertThat(context.getKeys()).hasSize(10);
+        assertThat(context.getKeys()).hasSize(11);
         assertThat(context.get("build_previous_number")).isNull();
     }
 
@@ -202,7 +202,7 @@ public class AbstractPageTest extends PageTest {
 
         // then
         VelocityContext context = page.context;
-        assertThat(context.getKeys()).hasSize(11);
+        assertThat(context.getKeys()).hasSize(12);
         assertThat(context.get("build_previous_number")).isEqualTo(33);
     }
 
