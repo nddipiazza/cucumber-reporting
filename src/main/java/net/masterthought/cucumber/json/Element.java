@@ -11,7 +11,7 @@ import net.masterthought.cucumber.util.Util;
 public class Element implements Durationable {
 
     // Start: attributes from JSON file report
-    private final String name = null;
+    private String name = null;
     private final String type = null;
     private final String description = null;
     private final String keyword = null;
@@ -124,5 +124,13 @@ public class Element implements Durationable {
         for (Step step : steps) {
             duration += step.getResult().getDuration();
         }
+    }
+    
+    /**
+     * Append a string to the name.
+     * @param str The string to append.
+     */
+    public void appendToName(String str) {
+        name += str;
     }
 }

@@ -1,6 +1,9 @@
 package net.masterthought.cucumber;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import com.google.common.collect.Lists;
+
+import net.masterthought.cucumber.json.Element;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,6 +74,9 @@ public class ReportParser {
                 continue;
             }
             Feature[] features = parseForFeature(jsonFile);
+            if (configuration.containsReducingMethod(ReducingMethod.KEEP_ONLY_LATEST_SCENARIO_RUNS)) {
+                keepOnlyLatestScenarioRuns(features);
+            }
             LOG.log(Level.INFO, String.format("File '%s' contains %d features", jsonFile, features.length));
             featureResults.addAll(Arrays.asList(features));
         }
@@ -79,6 +87,42 @@ public class ReportParser {
         }
 
         return featureResults;
+    }
+    
+    /**
+     * If the JSON file has the same scenarios run multiple times, keep only the
+     * latest scenario's run.
+     */
+    private void keepOnlyLatestScenarioRuns(Feature[] features) {
+        for (Feature feature : features) {
+            Element[] elements = feature.getElements();
+            List<Element> elementList = Lists.newArrayList(elements); 
+            ListIterator<Element> li = elementList.listIterator(elementList.size());
+            Optional<Element> lastElement = Optional.empty();
+            int numRemoved = 0;
+            while (li.hasPrevious()) {
+                Element element = li.previous();
+                if (lastElement.isPresent() && element.getId().equals(lastElement.get().getId())) {
+                    if (LOG.isLoggable(Level.FINE)) {
+                        LOG.log(Level.FINE, String.format("Reducing method KEEP_ONLY_EARLIEST_SCENARIO_RUNS is removing an earlier test result of scenario %s", feature.getName()));    
+                    }
+                    li.remove();
+                    ++numRemoved;
+                } else {
+                    addRetryNumberToElmIfNeeded(lastElement, numRemoved);
+                    lastElement = Optional.of(element);
+                    numRemoved = 0;
+                }
+            }
+            addRetryNumberToElmIfNeeded(lastElement, numRemoved);
+            feature.setElements(elementList.toArray(new Element[0]));
+        }
+    }
+
+    private void addRetryNumberToElmIfNeeded(Optional<Element> lastElement, int numRemoved) {
+        if (lastElement.isPresent() && numRemoved > 0) {
+            lastElement.get().appendToName(" [Retry count " + (numRemoved + 1) + "]");
+        }
     }
 
     /**
